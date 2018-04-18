@@ -14,7 +14,7 @@ labels = np.zeros((885000, 1), dtype = np.float32)
 
 originals_path = '/Users/vladarozova/Dropbox/PhD project/angiogenesis/samples for ridge detection'
 labels_path = '/Users/vladarozova/Dropbox/PhD project/angiogenesis/Anna\'s results'
-output = '/Users/vladarozova/Dropbox/PhD project/angiogenesis/datasets'
+output = '/Users/vladarozova/Dropbox/PhD project/angiogenesis'
 
 def load_csv(filename):
     csv_path = os.path.join(labels_path, filename)
