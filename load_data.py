@@ -6,10 +6,7 @@ import matplotlib.pyplot as plt
 patch_size = 23
 d = int((patch_size - 1)/2)
 
-#originals = np.empty((0, patch_size, 3), float32)
-#originals = np.zeros((21000000, patch_size, 3), dtype = np.float32)
-originals = np.zeros((885000, patch_size, patch_size, 3), dtype = np.float32)
-#labels = np.empty((0, 1), float32)
+originals = np.zeros((885000, patch_size, patch_size), dtype = np.float32)
 labels = np.zeros((885000, 1), dtype = np.float32)
 
 originals_path = '/Users/vladarozova/Dropbox/PhD project/angiogenesis/samples for ridge detection'
@@ -21,14 +18,11 @@ def load_csv(filename):
     return pd.read_csv(csv_path)
 
 def extract_patches(roi, height, width, length):
-    #patches = np.zeros((length, patch_size, 3), dtype = np.float32)
-    patches = np.zeros((length, patch_size, patch_size, 3), dtype = np.float32)
+    patches = np.zeros((length, patch_size, patch_size), dtype = np.float32)
     patch_iter = 0
     for i in range(0, height - patch_size + 1):
         for j in range(0, width - patch_size + 1):
-            #patches[patch_iter : patch_iter + patch_size, :, :] = roi[i : i + patch_size, j : j + patch_size, :]
-            patches[patch_iter, :, :, :] = roi[i : i + patch_size, j : j + patch_size, :]
-            #patch_iter += patch_size
+            patches[patch_iter, :, :] = roi[i : i + patch_size, j : j + patch_size]
             patch_iter += 1
     return patches
 
@@ -36,13 +30,10 @@ def process_rois(filename, folder, count):
     roi_data = load_csv(filename)
     originals_folder = os.path.join(originals_path, folder)
     labels_folder = os.path.join(labels_path, folder)
-    
-#     np.random.seed(42)
-#     roi_data = roi_data.iloc[np.random.permutation(len(roi_data))]
 
     N_patches = sum((roi_data['height'] - patch_size + 1) 
                     * (roi_data['width'] - patch_size + 1))
-    rois = np.zeros((N_patches, patch_size, patch_size, 3), dtype = np.float32)
+    rois = np.zeros((N_patches, patch_size, patch_size), dtype = np.float32)
     skeletons = np.zeros((N_patches, 1), dtype = np.float32)
 
     roi_iter = 0
@@ -59,10 +50,10 @@ def process_rois(filename, folder, count):
 #                                                                        row['xcoord'] : 
 #                                                                        row['xcoord'] + width, :],
 #                                                                    height, width, length)
-        rois[roi_iter : roi_iter + length, :, :, :] = extract_patches(img[row['ycoord'] :
+        rois[roi_iter : roi_iter + length, :, :] = extract_patches(img[row['ycoord'] :
                                                                        row['ycoord'] + height, 
                                                                        row['xcoord'] : 
-                                                                       row['xcoord'] + width, :],
+                                                                       row['xcoord'] + width, 1],
                                                                    height, width, length)
         roi_iter += length
         
@@ -75,7 +66,7 @@ def process_rois(filename, folder, count):
         
     labels[count : count + N_patches] = skeletons
     #originals[count * patch_size : count * patch_size + N_patches * patch_size, :, :] = rois
-    originals[count : count + N_patches, :, :, :] = rois
+    originals[count : count + N_patches, :, :] = rois
     count += N_patches
     return originals, labels, count
 
