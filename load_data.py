@@ -60,7 +60,6 @@ def process_rois(filename, folder, count):
         img = plt.imread(labels_folder + row['label'] + '_' + str(row['sample']) + '_' + 'blurred_skeletone.jpg')
         if (img.ndim > 2):
             img_grey = np.dot(img[...,:3], [0.299, 0.587, 0.114])
-            return
             skeletons[skelet_iter : skelet_iter + patches_per_roi] = img_grey[d : height - d, 
                                                                           d : width - d].reshape(-1, 1)
         else:
