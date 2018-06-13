@@ -9,9 +9,9 @@ d = int((patch_size - 1)/2)
 originals = np.zeros((885000, patch_size, patch_size), dtype = np.float32)
 labels = np.zeros((885000, 1), dtype = np.float32)
 
-originals_path = '/Users/vladarozova/Dropbox/PhD project/angiogenesis/samples for ridge detection'
-labels_path = '/Users/vladarozova/Dropbox/PhD project/angiogenesis/Anna\'s results'
-output = '/Users/vladarozova/Dropbox/PhD project/angiogenesis'
+originals_path = '/Users/vladarozova/Dropbox/PhD/angiogenesis/samples for ridge detection'
+labels_path = '/Users/vladarozova/Dropbox/PhD/angiogenesis/Anna\'s results'
+output = '/Users/vladarozova/Dropbox/PhD/angiogenesis'
 
 def load_csv(filename):
     csv_path = os.path.join(labels_path, filename)
@@ -57,7 +57,7 @@ def process_rois(filename, folder, count):
                                                                    height, width, length)
         roi_iter += length
         
-        img = plt.imread(labels_folder + row['label'] + '_' + str(row['sample']) + '_' + 'blurred_skeletone.jpg')
+        img = plt.imread(labels_folder + row['label'] + '_' + str(row['sample']) + '_' + 'skeletone.jpg')
         if (img.ndim > 2):
             img_grey = np.dot(img[...,:3], [0.299, 0.587, 0.114])
             skeletons[skelet_iter : skelet_iter + patches_per_roi] = img_grey[d : height - d, 
