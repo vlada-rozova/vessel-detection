@@ -26,6 +26,17 @@ def extract_patches(roi, height, width, length):
             patch_iter += 1
     return patches
 
+def extract_patches_2(roi, patches_rows, patches_cols, patches_per_roi):
+    patches = np.zeros((patches_per_roi, patch_size, patch_size), dtype = np.float32)
+    patch_iter = 0
+    
+    for i in range(0, patches_rows):
+        for j in range (0, patches_cols):
+            patches[patch_iter, :, :] = roi[i * patch_size : (i + 1) * patch_size,
+                                            j * patch_size : (j + 1) * patch_size]
+            patch_iter += 1
+    return patches
+
 def process_rois(filename, folder, count):
     roi_data = load_csv(filename)
     originals_folder = os.path.join(originals_path, folder)
@@ -70,6 +81,51 @@ def process_rois(filename, folder, count):
         
     labels[count : count + N_patches] = skeletons
     #originals[count * patch_size : count * patch_size + N_patches * patch_size, :, :] = rois
+    originals[count : count + N_patches, :, :] = rois
+    count += N_patches
+    return originals, labels, count
+
+def process_rois_2(filename, folder, count):
+    roi_data = load_csv(filename)
+    originals_folder = os.path.join(originals_path, folder)
+    labels_folder = os.path.join(labels_path, folder)
+    
+    N_patches = int(sum(np.floor(roi_data['height'] / patch_size) *
+                    np.floor(roi_data['width'] / patch_size)))
+
+    rois = np.zeros((N_patches, patch_size, patch_size), dtype = np.float32)
+    skeletons = np.zeros((N_patches, 1), dtype = np.float32)
+
+    roi_iter = 0
+    skelet_iter = 0
+    for index, row in roi_data.iterrows():
+        img = plt.imread(originals_folder + row['label'] + '.tif')
+        height = row['height']
+        width = row['width']
+        patches_rows = int(np.floor(height / patch_size))
+        patches_cols = int(np.floor(width / patch_size))
+        patches_per_roi = patches_rows * patches_cols
+        #length = patches_per_roi
+        
+        rois[roi_iter : roi_iter + patches_per_roi, :, :] = extract_patches_2(img[row['ycoord'] :
+                                                                                  row['ycoord'] + height, 
+                                                                                  row['xcoord'] : 
+                                                                                  row['xcoord'] + width, 1],
+                                                                              patches_rows, patches_cols, patches_per_roi)
+        roi_iter += patches_per_roi
+        
+        #img = plt.imread(labels_folder + row['label'] + '_' + str(row['sample']) + '_' + 'skeletone.jpg')
+        #if (img.ndim > 2):
+        #    img_grey = np.dot(img[...,:3], [0.299, 0.587, 0.114])
+        #    skeletons[skelet_iter : skelet_iter + patches_per_roi] = img_grey[d : height - d, 
+        #                                                                  d : width - d].reshape(-1, 1)
+        #else:
+        #    skeletons[skelet_iter : skelet_iter + patches_per_roi] = img[d : height - d, 
+        #                                                                  d : width - d].reshape(-1, 1)
+        #    
+        #skelet_iter += patches_per_roi
+        
+    labels[count : count + N_patches] = skeletons
     originals[count : count + N_patches, :, :] = rois
     count += N_patches
     return originals, labels, count
