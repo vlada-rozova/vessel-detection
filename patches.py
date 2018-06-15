@@ -54,13 +54,7 @@ def process_rois(filename, folder, count):
         height = row['height']
         width = row['width']
         patches_per_roi = (height - patch_size + 1) * (width - patch_size + 1)
-        #length = patch_size * patches_per_roi
         length = patches_per_roi
-#         rois[roi_iter : roi_iter + length, :, :] = extract_patches(img[row['ycoord'] :
-#                                                                        row['ycoord'] + height, 
-#                                                                        row['xcoord'] : 
-#                                                                        row['xcoord'] + width, :],
-#                                                                    height, width, length)
         rois[roi_iter : roi_iter + length, :, :] = extract_patches(img[row['ycoord'] :
                                                                        row['ycoord'] + height, 
                                                                        row['xcoord'] : 
@@ -80,7 +74,6 @@ def process_rois(filename, folder, count):
         skelet_iter += patches_per_roi
         
     labels[count : count + N_patches] = skeletons
-    #originals[count * patch_size : count * patch_size + N_patches * patch_size, :, :] = rois
     originals[count : count + N_patches, :, :] = rois
     count += N_patches
     return originals, labels, count
@@ -130,3 +123,51 @@ def process_rois_2(filename, folder, count):
     count += N_patches
     return originals, labels, count
 
+def plot_patches(x, height, width, patch_size):
+    nrows, rem_i = divmod(height, patch_size)
+    ncols, rem_j = divmod(width, patch_size)
+    roi_height = height - patch_size + 1
+    roi_width = width - patch_size + 1
+    print('nrows =', nrows, 'ncols =', ncols, 
+          'rem_i =', rem_i, 'rem_j =', rem_j, 
+          'roi_height =', roi_height, 'roi_width =', roi_width)
+    x_ = np.zeros((height, width), dtype = np.float32)
+    for i in range(0, nrows):
+        for j in range(0, ncols):
+            x_[i * patch_size : (i + 1) * patch_size, 
+               j * patch_size : (j + 1) * patch_size] = \
+            x[(i * roi_width + j) * patch_size, :, :]                       
+            if (j == ncols - 1):
+                x_[i * patch_size : (i + 1) * patch_size, -patch_size :] = \
+                x[(i * roi_width + j) * patch_size + rem_j, :, :]
+            if (i == nrows - 1):
+                x_[-patch_size :, j * patch_size : (j + 1) * patch_size] = \
+                x[(i * roi_width + j) * patch_size + rem_i * roi_width, :, :]
+    x_[- patch_size:, -patch_size:] = x[-1, :, :]
+    print(x.shape)
+    print(x_.shape)
+    plt.figure(figsize=(15, 10))
+    plt.imshow(x_, cmap = plt.cm.gray, interpolation = "nearest")
+    plt.show()
+
+def plot_skeleton(x, height, width, patch_size):
+    roi_height = height - patch_size + 1
+    roi_width = width - patch_size + 1
+    x_ = x.reshape(roi_height, roi_width)
+    
+    plt.figure(figsize=(15, 10))
+    plt.imshow(x_, cmap = plt.cm.gray, interpolation = "nearest")
+    plt.show()
+    
+def plot_patches_without_overlap(x, nrows, ncols, patch_size):
+    x_ = np.zeros((nrows * patch_size, ncols * patch_size), dtype = np.float32)
+    for i in range(0, nrows):
+        for j in range(0, ncols):
+            x_[i * patch_size : (i + 1) * patch_size, 
+               j * patch_size : (j + 1) * patch_size] = x[i * ncols + j, :, :]
+
+    print(x.shape)
+    print(x_.shape)
+    plt.figure(figsize=(15, 10))
+    plt.imshow(x_, cmap = plt.cm.gray, interpolation = "nearest")
+    plt.show()
