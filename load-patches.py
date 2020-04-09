@@ -50,13 +50,13 @@ def get_patches_and_labels(filename, folder, patch_size, clip_limit):
             rois.extend(extract_patches_2d(img[row.ycoord : row.bottom_px, row.xcoord : row.right_px], 
                                            (patch_size, patch_size)))
 
-            sklt = cv2.imread(labels_path + folder + label + '_' + str(row['sample']) + '_' + 'skeletone.jpg')
+            sklt = cv2.imread(labels_path + folder + label + '_' + 
+                              str(row['sample']) + '_' + 'skeletone.jpg', 
+                              cv2.IMREAD_GRAYSCALE)
             if (sklt.ndim > 2):
                 sklt = np.dot(sklt[...,:3], [0.299, 0.587, 0.114])
-                sklt = sklt[r : - r, r : - r].reshape(-1, 1)
-                sklt = preprocess(sklt)
-            else:
-                sklt = sklt[r : - r, r : - r].reshape(-1, 1)
+            sklt = sklt[r : - r, r : - r].reshape(-1, 1)
+            sklt = preprocess(sklt)
             labels.extend(sklt)
 
     if sum(labels) / len(labels) < 0.3:
